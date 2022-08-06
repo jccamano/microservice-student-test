@@ -1,4 +1,4 @@
-package com.application.microservice.students.models.entity;
+package com.application.microservice.commons.students.models.entity;
 
 import java.util.Date;
 
@@ -83,6 +83,22 @@ public class StudentEntity {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
-	}	
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(this == obj) {
+			return true;
+		}
+		
+		if(!(obj instanceof StudentEntity)) {
+			return false;
+		}
+		StudentEntity st = (StudentEntity) obj;
+		
+		return this.id != null && this.id.equals(st.getId());  
+	}
+	
+	
 			
 }

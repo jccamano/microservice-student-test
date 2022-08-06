@@ -20,6 +20,11 @@
 	</properties>
 	<dependencies>
 		<dependency>
+			<groupId>com.application.microservice.commons.students</groupId>
+			<artifactId>microservice-commons-students</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>com.application.microservice.commons</groupId>
 			<artifactId>microservice-commons</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
