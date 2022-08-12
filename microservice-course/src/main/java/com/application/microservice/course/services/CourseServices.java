@@ -5,5 +5,6 @@ import com.application.microservice.course.models.entity.CourseEntity;
 
 
 public interface CourseServices extends CommonService<CourseEntity>{
-
+	
+	public CourseEntity findCourseByStudentId(Long id);
 }
