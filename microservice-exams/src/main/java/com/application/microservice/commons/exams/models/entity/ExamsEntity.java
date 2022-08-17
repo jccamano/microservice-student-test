@@ -1,5 +1,6 @@
 package com.application.microservice.commons.exams.models.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,6 +16,8 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "exams")
@@ -35,8 +38,13 @@ public class ExamsEntity {
 		this.creationDate = new Date();
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnoreProperties(value = { "exams" }, allowSetters = true)
+	@OneToMany(mappedBy = "exams", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<QuestionEntity> question;
+	
+	public ExamsEntity() {
+		this.question = new ArrayList<>();
+	}
 
 	public Long getId() {
 		return id;
@@ -67,6 +75,33 @@ public class ExamsEntity {
 	}
 
 	public void setQuestion(List<QuestionEntity> question) {
-		this.question = question;
+		this.question.clear();
+		question.forEach(this::addQuestion);
 	}
+	
+	public void addQuestion(QuestionEntity question) {
+		this.question.add(question);
+		question.setExams(this);
+	}
+	
+	public void removeQuestion(QuestionEntity question) {
+		this.question.remove(question);
+		question.setExams(null);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(this == obj) {
+			return true;
+		}
+		
+		if(!(obj instanceof ExamsEntity)) {
+			return false;
+		}
+		ExamsEntity st = (ExamsEntity) obj;
+		
+		return this.id != null && this.id.equals(st.getId()); 
+	}
+	
+	
 }
