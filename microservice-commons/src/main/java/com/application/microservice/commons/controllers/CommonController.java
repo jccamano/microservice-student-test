@@ -1,18 +1,22 @@
 package com.application.microservice.commons.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
 
 import com.application.microservice.commons.services.CommonService;
 
@@ -26,7 +30,12 @@ public class CommonController<E, S extends CommonService<E>> {
 	public ResponseEntity<?> getAllStudents(){
 		return ResponseEntity.ok().body(service.findAll());		
 	}
-		
+	
+	@GetMapping("/pagina")	
+	public ResponseEntity<?> listar(Pageable pageable){
+		return ResponseEntity.ok().body(service.findAll(pageable));		
+	}
+	
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getStudentById(@PathVariable Long id){
 		
@@ -38,7 +47,11 @@ public class CommonController<E, S extends CommonService<E>> {
 	}	
 	
 	@PostMapping
-	public ResponseEntity<?> createStudent(@RequestBody E entity){
+	public ResponseEntity<?> createStudent(@Valid @RequestBody E entity, BindingResult result){
+		
+		if(result.hasFieldErrors()) {
+			return this.validar(result);
+		}
 		E entityDB = service.save(entity);
 		return ResponseEntity.status(HttpStatus.CREATED).body(entityDB);		
 	}
@@ -47,6 +60,14 @@ public class CommonController<E, S extends CommonService<E>> {
 	public ResponseEntity<?> deleteStudent(@PathVariable Long id){
 		service.deleteById(id);
 		return ResponseEntity.noContent().build(); 
+	}
+	
+	protected ResponseEntity<?> validar(BindingResult result){
+		Map<String, Object> errores = new HashMap<>();
+		result.getFieldErrors().forEach(err -> {
+			errores.put(err.getField(), "El Campo " + err.getField() + " " + err.getDefaultMessage());
+		});
+		return ResponseEntity.badRequest().body(errores);
 	}
 
 }

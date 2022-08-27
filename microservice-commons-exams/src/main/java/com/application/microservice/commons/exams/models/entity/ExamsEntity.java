@@ -11,11 +11,14 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -27,20 +30,25 @@ public class ExamsEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotEmpty
 	private String name;
 
 	@Column(name = "creation_date")
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date creationDate;
-
-	@PrePersist
-	public void creationDate() {
-		this.creationDate = new Date();
-	}
+	private Date creationDate;	
 
 	@JsonIgnoreProperties(value = { "exams" }, allowSetters = true)
 	@OneToMany(mappedBy = "exams", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<QuestionEntity> question;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@NotNull
+	private MatterEntity matter;
+	
+	@PrePersist
+	public void creationDate() {
+		this.creationDate = new Date();
+	}
 	
 	public ExamsEntity() {
 		this.question = new ArrayList<>();
@@ -77,8 +85,16 @@ public class ExamsEntity {
 	public void setQuestion(List<QuestionEntity> question) {
 		this.question.clear();
 		question.forEach(this::addQuestion);
-	}
+	}	
 	
+	public MatterEntity getMatter() {
+		return matter;
+	}
+
+	public void setMatter(MatterEntity matter) {
+		this.matter = matter;
+	}
+
 	public void addQuestion(QuestionEntity question) {
 		this.question.add(question);
 		question.setExams(this);

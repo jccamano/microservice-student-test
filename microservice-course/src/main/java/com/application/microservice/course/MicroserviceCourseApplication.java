@@ -8,6 +8,7 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 @SpringBootApplication
 @EnableEurekaClient
 @EntityScan({"com.application.microservice.commons.students.models.entity",
+	         "com.application.microservice.commons.exams.models.entity",
 	         "com.application.microservice.course.models.entity"})
 public class MicroserviceCourseApplication {
 

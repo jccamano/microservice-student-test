@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +24,11 @@ import com.application.microservice.commons.exams.service.ExamsService;
 public class ExamsController extends CommonController<ExamsEntity, ExamsService> {
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> editExams(@RequestBody ExamsEntity exams, @PathVariable Long id) {
+	public ResponseEntity<?> editExams(@Valid @RequestBody ExamsEntity exams, BindingResult result, @PathVariable Long id) {
+		
+		if(result.hasFieldErrors()) {
+			return this.validar(result);
+		}
 
 		Optional<ExamsEntity> op = service.findById(id);
 
@@ -29,16 +37,20 @@ public class ExamsController extends CommonController<ExamsEntity, ExamsService>
 		}
 		ExamsEntity examsDb = op.get();
 		examsDb.setName(exams.getName());
-		
-		  List<QuestionEntity> eliminadas = new ArrayList<>();
-		  examsDb.getQuestion().forEach(pdb -> { if(!exams.getQuestion().contains(pdb))
-		  { eliminadas.add(pdb); } });
-		  
-		  eliminadas.forEach(p -> { examsDb.removeQuestion(p); });
-		  
-		  examsDb.setQuestion(exams.getQuestion()); return
-		  ResponseEntity.status(HttpStatus.CREATED).body(service.save(examsDb));
-		 
+
+		List<QuestionEntity> eliminadas = new ArrayList<>();
+		examsDb.getQuestion().forEach(pdb -> {
+			if (!exams.getQuestion().contains(pdb)) {
+				eliminadas.add(pdb);
+			}
+		});
+
+		eliminadas.forEach(p -> {
+			examsDb.removeQuestion(p);
+		});
+
+		examsDb.setQuestion(exams.getQuestion());
+		return ResponseEntity.status(HttpStatus.CREATED).body(service.save(examsDb));
 
 		/*
 		 * examsDb.getQuestion().stream().filter(pdb ->
@@ -48,6 +60,16 @@ public class ExamsController extends CommonController<ExamsEntity, ExamsService>
 		 * ResponseEntity.status(HttpStatus.CREATED).body(service.save(examsDb));
 		 */
 
+	}
+
+	@GetMapping("/filtrar/{term}")
+	public ResponseEntity<?> filtrar(@PathVariable String term) {
+		return ResponseEntity.ok(service.findByName(term));
+	}
+
+	@GetMapping("/matters")
+	public ResponseEntity<?> listMatter() {
+		return ResponseEntity.ok(service.findAllMatters());
 	}
 
 }

@@ -10,12 +10,15 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotEmpty;
 
+import com.application.microservice.commons.exams.models.entity.ExamsEntity;
 import com.application.microservice.commons.students.models.entity.StudentEntity;
 
 @Entity
@@ -26,6 +29,7 @@ public class CourseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@NotEmpty
 	private String name;
 	
 	@Column(name = "creation_date")
@@ -35,18 +39,20 @@ public class CourseEntity {
 	@OneToMany(fetch = FetchType.LAZY)
 	private List<StudentEntity> students;
 	
+	@ManyToMany(fetch = FetchType.LAZY)
+	private List<ExamsEntity> exams;
+	
+	
+	public CourseEntity() {
+		this.students = new ArrayList<>();
+		this.exams = new ArrayList<>();
+
+	}
 	
 	@PrePersist
 	public void creationDate() {
 		this.creationDate = new Date();
 	}
-	
-	public CourseEntity() {
-		this.students = new ArrayList<>();
-
-	}
-
-
 
 	public Long getId() {
 		return id;
@@ -83,7 +89,7 @@ public class CourseEntity {
 		this.students = students;
 	}
 	
-	public void aggStudent(StudentEntity student) {
+	public void addStudent(StudentEntity student) {
 		this.students.add(student);
 	}
 	
@@ -92,4 +98,20 @@ public class CourseEntity {
 		this.students.remove(student);
 	}
 
+	public List<ExamsEntity> getExams() {
+		return exams;
+	}
+
+	public void setExams(List<ExamsEntity> exams) {
+		this.exams = exams;
+	}
+	
+	public void addExam(ExamsEntity exam) {
+		this.exams.add(exam);
+	}
+	
+	public void removeExam(ExamsEntity exam) {
+		this.exams.remove(exam);
+	}
+	
 }
